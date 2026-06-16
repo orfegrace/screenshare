@@ -33,7 +33,7 @@ export async function GET() {
   if (!entries) return NextResponse.json([]);
 
   // Get profiles for all user_ids
-  const userIds = [...new Set(entries.map((e) => e.user_id))];
+  const userIds = Array.from(new Set(entries.map((e) => e.user_id)));
   const { data: profiles } = await supabase
     .from("profiles")
     .select("id, username")

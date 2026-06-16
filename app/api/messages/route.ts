@@ -37,7 +37,7 @@ export async function GET() {
     }
   }
 
-  const otherIds = [...convoMap.keys()];
+  const otherIds = Array.from(convoMap.keys());
   if (otherIds.length === 0) return NextResponse.json([]);
 
   const { data: profiles } = await supabase

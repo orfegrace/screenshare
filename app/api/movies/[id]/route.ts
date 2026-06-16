@@ -59,7 +59,7 @@ export async function GET(
         .eq("status", "watched");
 
       if (entries && entries.length > 0) {
-        const userIds = [...new Set(entries.map((e) => e.user_id))];
+        const userIds = Array.from(new Set(entries.map((e) => e.user_id)));
         const { data: profiles } = await supabase
           .from("profiles")
           .select("id, username")
