@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { WatchlistModal } from "@/components/WatchlistModal";
 import { useToast } from "@/components/Toast";
-import type { WatchStatus } from "@/lib/types";
+import type { EntryData } from "@/components/WatchlistModal";
 
 export default function AddMoviePage() {
   const router = useRouter();
@@ -55,17 +55,13 @@ export default function AddMoviePage() {
     setShowModal(true);
   }
 
-  async function handleWatchlistSave(data: {
-    status: WatchStatus;
-    rating: number | null;
-    review: string;
-  }) {
+  async function handleWatchlistSave(data: EntryData) {
     if (!newMovieId) return;
 
     const res = await fetch("/api/watchlist", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ movie_id: newMovieId, ...data }),
+      body: JSON.stringify({ movie_id: newMovieId, status: data.status, rating: data.rating, review: data.review }),
     });
 
     if (res.ok) {
@@ -153,8 +149,6 @@ export default function AddMoviePage() {
             setShowModal(false);
             router.push("/movies");
           }}
-          movieTitle={title}
-          movieId={newMovieId}
           onSave={handleWatchlistSave}
         />
       )}

@@ -6,7 +6,8 @@ import Link from "next/link";
 import { StarDisplay } from "@/components/StarRating";
 import { WatchlistModal } from "@/components/WatchlistModal";
 import { useToast } from "@/components/Toast";
-import type { Movie, WatchlistEntry, WatchStatus } from "@/lib/types";
+import type { Movie, WatchlistEntry } from "@/lib/types";
+import type { EntryData } from "@/components/WatchlistModal";
 
 interface FriendReview {
   username: string;
@@ -36,23 +37,19 @@ export default function MovieDetailPage() {
 
   useEffect(() => { load(); }, [id]);
 
-  async function handleSave(data: {
-    status: WatchStatus;
-    rating: number | null;
-    review: string;
-  }) {
+  async function handleSave(data: EntryData) {
     let res: Response;
     if (myEntry) {
       res = await fetch(`/api/watchlist/${myEntry.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify({ status: data.status, rating: data.rating, review: data.review, watched_at: data.watched_at }),
       });
     } else {
       res = await fetch("/api/watchlist", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ movie_id: id, ...data }),
+        body: JSON.stringify({ movie_id: id, status: data.status, rating: data.rating, review: data.review }),
       });
     }
 
@@ -169,9 +166,7 @@ export default function MovieDetailPage() {
         <WatchlistModal
           isOpen
           onClose={() => setEditOpen(false)}
-          movieTitle={movie.title}
-          movieId={movie.id}
-          existing={myEntry}
+          existing={myEntry ?? { id: "", user_id: "", movie_id: movie.id, status: "watched", rating: null, review: null, watched_at: null, created_at: "", movie }}
           onSave={handleSave}
         />
       )}

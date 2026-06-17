@@ -25,6 +25,7 @@ export default function FriendsPage() {
   const [loading, setLoading] = useState(true);
   const [searching, setSearching] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [requested, setRequested] = useState<Set<string>>(new Set());
 
   async function fetchFriends() {
     const res = await fetch("/api/friends");
@@ -60,7 +61,7 @@ export default function FriendsPage() {
     setActionLoading(null);
     if (res.ok) {
       showToast("Friend request sent!", "success");
-      setSearchResults((prev) => prev.filter((p) => p.id !== addresseeId));
+      setRequested((prev) => new Set(prev).add(addresseeId));
     } else {
       const body = await res.json();
       showToast(body.error ?? "Failed to send request.", "error");
@@ -77,6 +78,10 @@ export default function FriendsPage() {
     setActionLoading(null);
     if (res.ok) {
       showToast(accept ? "Friend added!" : "Request declined.", "success");
+      if (!accept) {
+        const req = pending.find((p) => p.id === id);
+        if (req) setRequested((prev) => { const s = new Set(prev); s.delete(req.requester_profile.id); return s; });
+      }
       await fetchFriends();
     } else {
       showToast("Failed to respond.", "error");
@@ -187,10 +192,10 @@ export default function FriendsPage() {
                 </div>
                 <button
                   onClick={() => sendRequest(user.id)}
-                  disabled={actionLoading === user.id}
+                  disabled={actionLoading === user.id || requested.has(user.id)}
                   className="text-xs px-3 py-1.5 bg-white text-black hover:bg-[#ddd] disabled:opacity-50 transition-colors"
                 >
-                  {actionLoading === user.id ? "..." : "Add friend"}
+                  {actionLoading === user.id ? "..." : requested.has(user.id) ? "Requested" : "Request"}
                 </button>
               </li>
             ))}

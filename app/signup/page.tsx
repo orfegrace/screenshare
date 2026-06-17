@@ -11,9 +11,11 @@ export default function SignupPage() {
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   function validate() {
     const e: Record<string, string> = {};
@@ -23,6 +25,8 @@ export default function SignupPage() {
     else if (!/^[a-z0-9_]+$/.test(username)) e.username = "Only lowercase letters, numbers, and underscores.";
     if (!password) e.password = "Password is required.";
     else if (password.length < 6) e.password = "Password must be at least 6 characters.";
+    if (!confirm) e.confirm = "Please confirm your password.";
+    else if (confirm !== password) e.confirm = "Passwords do not match.";
     return e;
   }
 
@@ -35,7 +39,7 @@ export default function SignupPage() {
     setLoading(true);
     const supabase = createClient();
 
-    const { error: signupError, data } = await supabase.auth.signUp({
+    const { error: signupError } = await supabase.auth.signUp({
       email,
       password,
       options: { data: { username } },
@@ -106,6 +110,29 @@ export default function SignupPage() {
               </button>
             </div>
             {errors.password && <p className="text-xs text-white mt-1">{errors.password}</p>}
+          </div>
+
+          <div>
+            <label className="block text-xs text-[#888] mb-1.5">Confirm Password</label>
+            <div className="relative">
+              <input
+                type={showConfirm ? "text" : "password"}
+                autoComplete="new-password"
+                value={confirm}
+                onChange={(e) => setConfirm(e.target.value)}
+                placeholder="••••••••"
+                className="w-full pr-10"
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirm((v) => !v)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#888] hover:text-white transition-colors"
+                tabIndex={-1}
+              >
+                {showConfirm ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            </div>
+            {errors.confirm && <p className="text-xs text-white mt-1">{errors.confirm}</p>}
           </div>
 
           {errors.form && (

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/Toast";
 import type { Profile } from "@/lib/types";
@@ -14,6 +14,9 @@ export default function ProfilePage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [taken, setTaken] = useState(false);
+  const [checking, setChecking] = useState(false);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -28,6 +31,20 @@ export default function ProfilePage() {
     load();
   }, []);
 
+  function handleUsernameChange(val: string) {
+    const v = val.toLowerCase();
+    setUsername(v);
+    setTaken(false);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (!v || v === profile?.username) return;
+    debounceRef.current = setTimeout(async () => {
+      setChecking(true);
+      const res = await fetch(`/api/users/${encodeURIComponent(v)}`);
+      setChecking(false);
+      if (res.ok) setTaken(true); // username exists (belongs to someone else)
+    }, 400);
+  }
+
   function validate() {
     const e: Record<string, string> = {};
     if (!username.trim()) e.username = "Username is required.";
@@ -39,6 +56,7 @@ export default function ProfilePage() {
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
     const errs = validate();
+    if (taken) { setErrors({ username: "Username is already taken." }); return; }
     if (Object.keys(errs).length) { setErrors(errs); return; }
     setErrors({});
     setSaving(true);
@@ -89,12 +107,18 @@ export default function ProfilePage() {
           <input
             type="text"
             value={username}
-            onChange={(e) => setUsername(e.target.value.toLowerCase())}
+            onChange={(e) => handleUsernameChange(e.target.value)}
             placeholder="your name"
             autoFocus
           />
-          {errors.username && (
-            <p className="text-xs text-white mt-1">{errors.username}</p>
+          {taken && !checking && (
+            <p className="text-xs text-red-400 mt-1">Username is already taken.</p>
+          )}
+          {checking && (
+            <p className="text-xs text-[#555] mt-1">Checking...</p>
+          )}
+          {!taken && !checking && errors.username && (
+            <p className="text-xs text-red-400 mt-1">{errors.username}</p>
           )}
         </div>
 
