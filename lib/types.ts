@@ -10,6 +10,8 @@ export interface Movie {
   user_id: string;
   title: string;
   year: number | null;
+  genre: string | null;
+  director: string | null;
   poster_url: string | null;
   created_at: string;
 }
@@ -23,6 +25,7 @@ export interface WatchlistEntry {
   status: WatchStatus;
   rating: number | null;
   review: string | null;
+  watched_at: string | null;
   created_at: string;
   movie?: Movie;
 }
@@ -52,8 +55,12 @@ export interface FeedItem {
   action: WatchStatus;
   movie_title: string;
   movie_year: number | null;
+  movie_genre: string | null;
+  movie_director: string | null;
+  movie_poster_url: string | null;
   rating: number | null;
   review: string | null;
+  watched_at: string | null;
   created_at: string;
 }
 

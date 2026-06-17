@@ -7,7 +7,7 @@ export async function POST(request: NextRequest) {
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const body = await request.json();
-  const { title, year, poster_url } = body;
+  const { title, year, genre, director, poster_url } = body;
 
   if (!title?.trim()) {
     return NextResponse.json({ error: "Title is required." }, { status: 400 });
@@ -19,6 +19,8 @@ export async function POST(request: NextRequest) {
       user_id: user.id,
       title: title.trim(),
       year: year ?? null,
+      genre: genre?.trim() || null,
+      director: director?.trim() || null,
       poster_url: poster_url ?? null,
     })
     .select()

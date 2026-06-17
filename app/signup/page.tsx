@@ -47,21 +47,8 @@ export default function SignupPage() {
       return;
     }
 
-    if (data.user) {
-      const { error: profileError } = await supabase.from("profiles").insert({
-        id: data.user.id,
-        username,
-        bio: null,
-      });
-      if (profileError) {
-        setErrors({ form: profileError.message });
-        setLoading(false);
-        return;
-      }
-    }
-
     setLoading(false);
-    router.push("/home");
+    router.push("/movies");
     router.refresh();
   }
 

@@ -32,7 +32,7 @@ export default function LoginPage() {
       return;
     }
 
-    router.push("/home");
+    router.push("/movies");
     router.refresh();
   }
 

@@ -11,6 +11,7 @@ export default function AddMoviePage() {
   const { showToast } = useToast();
   const [title, setTitle] = useState("");
   const [year, setYear] = useState("");
+  const [posterUrl, setPosterUrl] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [newMovieId, setNewMovieId] = useState<string | null>(null);
@@ -37,6 +38,7 @@ export default function AddMoviePage() {
       body: JSON.stringify({
         title: title.trim(),
         year: year ? Number(year) : null,
+        poster_url: posterUrl.trim() || null,
       }),
     });
 
@@ -98,8 +100,7 @@ export default function AddMoviePage() {
 
         <div>
           <label className="block text-xs text-[#888] mb-1.5">
-            Year{" "}
-            <span className="text-[#555]">(optional)</span>
+            Year <span className="text-[#555]">(optional)</span>
           </label>
           <input
             type="number"
@@ -111,6 +112,28 @@ export default function AddMoviePage() {
           />
           {errors.year && (
             <p className="text-xs text-white mt-1">{errors.year}</p>
+          )}
+        </div>
+
+        <div>
+          <label className="block text-xs text-[#888] mb-1.5">
+            Poster Image URL <span className="text-[#555]">(optional)</span>
+          </label>
+          <input
+            type="url"
+            value={posterUrl}
+            onChange={(e) => setPosterUrl(e.target.value)}
+            placeholder="https://..."
+          />
+          {posterUrl && (
+            <div className="mt-2 w-20 h-28 overflow-hidden border border-[#333]">
+              <img
+                src={posterUrl}
+                alt="Poster preview"
+                className="w-full h-full object-cover"
+                onError={(e) => (e.currentTarget.style.display = "none")}
+              />
+            </div>
           )}
         </div>
 

@@ -78,6 +78,32 @@ export async function GET(
   return NextResponse.json({ movie, myEntry: myEntry ?? null, friendReviews });
 }
 
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  const supabase = await createServerSupabaseClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const { title, year, genre, director, poster_url } = await request.json();
+
+  const { error } = await supabase
+    .from("movies")
+    .update({
+      ...(title !== undefined && { title: title.trim() }),
+      ...(year !== undefined && { year }),
+      ...(genre !== undefined && { genre: genre?.trim() || null }),
+      ...(director !== undefined && { director: director?.trim() || null }),
+      ...(poster_url !== undefined && { poster_url: poster_url || null }),
+    })
+    .eq("id", params.id)
+    .eq("user_id", user.id);
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  return NextResponse.json({ success: true });
+}
+
 export async function DELETE(
   _request: NextRequest,
   { params }: { params: { id: string } }

@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const body = await request.json();
-  const { movie_id, status, rating, review } = body;
+  const { movie_id, status, rating, review, watched_at } = body;
 
   if (!movie_id) return NextResponse.json({ error: "movie_id required" }, { status: 400 });
   if (!status) return NextResponse.json({ error: "status required" }, { status: 400 });
@@ -43,6 +43,7 @@ export async function POST(request: NextRequest) {
       status,
       rating: rating ?? null,
       review: review || null,
+      watched_at: watched_at || null,
     })
     .select()
     .single();

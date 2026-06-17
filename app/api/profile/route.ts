@@ -49,7 +49,7 @@ export async function PATCH(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { username, bio } = await request.json();
+  const { username } = await request.json();
 
   if (!username?.trim()) {
     return NextResponse.json({ error: "Username is required." }, { status: 400 });
@@ -57,8 +57,7 @@ export async function PATCH(request: NextRequest) {
 
   const { error } = await supabase
     .from("profiles")
-    .update({ username: username.trim(), bio: bio || null })
-    .eq("id", user.id);
+    .upsert({ id: user.id, username: username.trim() });
 
   if (error) {
     if (error.code === "23505") {

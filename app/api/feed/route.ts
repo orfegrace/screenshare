@@ -23,8 +23,8 @@ export async function GET() {
   const { data: entries } = await supabase
     .from("watchlist")
     .select(`
-      id, status, rating, review, created_at, user_id,
-      movie:movies(title, year)
+      id, status, rating, review, watched_at, created_at, user_id,
+      movie:movies(title, year, genre, director, poster_url)
     `)
     .in("user_id", allUserIds)
     .order("created_at", { ascending: false })
@@ -49,8 +49,12 @@ export async function GET() {
       action: e.status,
       movie_title: movie?.title ?? "",
       movie_year: movie?.year ?? null,
+      movie_genre: movie?.genre ?? null,
+      movie_director: movie?.director ?? null,
+      movie_poster_url: movie?.poster_url ?? null,
       rating: e.rating,
       review: e.review,
+      watched_at: e.watched_at ?? null,
       created_at: e.created_at,
     };
   });

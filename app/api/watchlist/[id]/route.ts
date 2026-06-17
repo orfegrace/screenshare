@@ -10,12 +10,13 @@ export async function PATCH(
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const body = await request.json();
-  const { status, rating, review } = body;
+  const { status, rating, review, watched_at } = body;
 
   const update: Record<string, unknown> = {};
   if (status !== undefined) update.status = status;
   if (rating !== undefined) update.rating = rating;
   if (review !== undefined) update.review = review || null;
+  if (watched_at !== undefined) update.watched_at = watched_at || null;
 
   const { data, error } = await supabase
     .from("watchlist")
