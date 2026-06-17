@@ -52,7 +52,8 @@ html.light svg.no-invert {
 }
 
 input,
-textarea {
+textarea,
+select {
   background: #111;
   color: #fff;
   border: 1px solid #222;
@@ -63,7 +64,8 @@ textarea {
 }
 
 input:focus,
-textarea:focus {
+textarea:focus,
+select:focus {
   outline: none;
   border-color: #fff;
 }
