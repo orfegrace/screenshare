@@ -311,18 +311,20 @@ export function WatchlistModal({ isOpen, onClose, existing, onSave, onDelete, on
           ))}
         </div>
 
-        {/* Title + Year */}
+        {/* Title */}
+        <div>
+          <Label>Title <span className="text-white normal-case">*</span></Label>
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="e.g. Dune"
+            required
+          />
+        </div>
+
+        {/* Year + Genre */}
         <div className="grid grid-cols-2 gap-3">
-          <div className="col-span-1">
-            <Label>Title <span className="text-white normal-case">*</span></Label>
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="e.g. Dune"
-              required
-            />
-          </div>
           <div>
             <Label>Year</Label>
             <input
@@ -334,17 +336,13 @@ export function WatchlistModal({ isOpen, onClose, existing, onSave, onDelete, on
               max="2100"
             />
           </div>
-        </div>
-
-        {/* Genre + Director */}
-        <div className="grid grid-cols-2 gap-3">
           <div>
             <Label>Genre</Label>
             <div className="relative">
               <select
                 value={genre}
                 onChange={(e) => setGenre(e.target.value)}
-                className="w-full appearance-none pr-6"
+                className={`w-full appearance-none pr-6${!genre ? " placeholder" : ""}`}
               >
                 <option value="">— Select —</option>
                 {GENRES.map((g) => (
@@ -356,6 +354,10 @@ export function WatchlistModal({ isOpen, onClose, existing, onSave, onDelete, on
               </svg>
             </div>
           </div>
+        </div>
+
+        {/* Director + Date */}
+        <div className="grid grid-cols-2 gap-3">
           <div>
             <Label>Director</Label>
             <input
@@ -365,16 +367,14 @@ export function WatchlistModal({ isOpen, onClose, existing, onSave, onDelete, on
               placeholder="e.g. Denis Villeneuve"
             />
           </div>
-        </div>
-
-        {/* Date */}
-        <div>
-          <Label>Date</Label>
-          <input
-            type="date"
-            value={watchedAt}
-            onChange={(e) => setWatchedAt(e.target.value)}
-          />
+          <div>
+            <Label>Date</Label>
+            <input
+              type="date"
+              value={watchedAt}
+              onChange={(e) => setWatchedAt(e.target.value)}
+            />
+          </div>
         </div>
 
         {/* Rating */}
@@ -401,7 +401,7 @@ export function WatchlistModal({ isOpen, onClose, existing, onSave, onDelete, on
             value={review}
             onChange={(e) => setReview(e.target.value)}
             rows={2}
-            placeholder="Thoughts, favourite quotes, why you loved it…"
+            placeholder="Thoughts, favorite quotes, why you loved it…"
             className="resize-none"
           />
         </div>

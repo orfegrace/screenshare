@@ -2,7 +2,7 @@
 
 interface StarRatingProps {
   value: number | null;
-  onChange?: (value: number) => void;
+  onChange?: (value: number | null) => void;
   readonly?: boolean;
   size?: "sm" | "md" | "lg";
 }
@@ -25,7 +25,7 @@ export function StarRating({
         <button
           key={star}
           type="button"
-          onClick={() => !readonly && onChange?.(star)}
+          onClick={() => !readonly && onChange?.(star === value ? null : star)}
           disabled={readonly}
           className={`${
             value !== null && star <= (value ?? 0)

@@ -75,6 +75,17 @@ textarea::placeholder {
   color: #666;
 }
 
+select.placeholder {
+  color: #666;
+}
+
+input[type="date"]::-webkit-datetime-edit {
+  color: #666;
+}
+input[type="date"]:not([value=""])::-webkit-datetime-edit {
+  color: #fff;
+}
+
 button {
   cursor: pointer;
   transition: background-color 0.15s, color 0.15s, border-color 0.15s;
