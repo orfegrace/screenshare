@@ -264,7 +264,7 @@ export function WatchlistModal({ isOpen, onClose, existing, onSave, onDelete, on
       isOpen={isOpen}
       onClose={onClose}
       title={isNew ? "Add Entry" : "Edit Entry"}
-      headerExtra={!isNew ? dotsMenu : undefined}
+      headerExtra={undefined}
       footer={
         <div className="flex gap-2">
           {!isNew && (
