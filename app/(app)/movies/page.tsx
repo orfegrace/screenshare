@@ -18,6 +18,8 @@ export default function MoviesPage() {
   const menuRef = useRef<HTMLDivElement>(null);
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState<WatchStatus | "">("");
+  const firstCardRef = useRef<HTMLDivElement>(null);
+  const addCardRef = useRef<HTMLDivElement>(null);
   const [filterRating, setFilterRating] = useState<number | "">("");
   const [sortBy, setSortBy] = useState<"date" | "az" | "year">("date");
 
@@ -185,6 +187,12 @@ export default function MoviesPage() {
       return db.localeCompare(da);
     });
 
+  useEffect(() => {
+    if (firstCardRef.current && addCardRef.current) {
+      addCardRef.current.style.height = `${firstCardRef.current.offsetHeight}px`;
+    }
+  }, [visibleEntries, view]);
+
   return (
     <div className="max-w-4xl mx-auto px-6 py-10">
       <div className="flex items-center justify-between mb-8">
@@ -255,10 +263,10 @@ export default function MoviesPage() {
       {view === "card" && (
         loading ? skeletonCard : (
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-            {visibleEntries.map((entry) => {
+            {visibleEntries.map((entry, idx) => {
               const statusLabel = entry.status === "watched" ? "Watched" : "Want to Watch";
               return (
-              <div key={entry.id} className="group relative cursor-pointer" onClick={() => setEditing(entry)}>
+              <div key={entry.id} ref={idx === 0 ? firstCardRef : undefined} className="group relative cursor-pointer" onClick={() => setEditing(entry)}>
                 <div className="flex flex-col bg-[#111] border border-[#222] overflow-hidden">
                   {/* Poster — true 3:4 */}
                   <div className="aspect-[3/4] overflow-hidden shrink-0">
@@ -325,17 +333,12 @@ export default function MoviesPage() {
             ); })}
 
             {/* Add entry card */}
-            <button
-              onClick={() => setAddingOpen(true)}
-              className="relative flex flex-col border border-dashed border-[#333] text-[#555] hover:text-white hover:border-[#888] transition-colors overflow-hidden"
-            >
-              <div className="aspect-[3/4] w-full" />
-              <div className="h-20" />
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
+            <div ref={addCardRef} className="group relative cursor-pointer border border-dashed border-[#333] hover:border-[#888] transition-colors flex items-center justify-center" onClick={() => setAddingOpen(true)}>
+              <div className="flex flex-col items-center gap-2 text-[#555] group-hover:text-white transition-colors">
                 <span className="text-2xl leading-none">+</span>
                 <span className="text-[10px] uppercase tracking-widest">Add</span>
               </div>
-            </button>
+            </div>
           </div>
         )
       )}

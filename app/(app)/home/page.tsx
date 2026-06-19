@@ -125,6 +125,7 @@ function CommentToggle({ entryId, className }: { entryId: string; className?: st
 
 export default function HomePage() {
   const [feed, setFeed] = useState<FeedItem[]>([]);
+  const [currentUsername, setCurrentUsername] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<ViewMode>("list");
   const [viewing, setViewing] = useState<WatchlistEntry | null>(null);
@@ -132,7 +133,11 @@ export default function HomePage() {
   useEffect(() => {
     async function load() {
       const res = await fetch("/api/feed");
-      if (res.ok) setFeed(await res.json());
+      if (res.ok) {
+        const data = await res.json();
+        setFeed(data.feed);
+        setCurrentUsername(data.current_username);
+      }
       setLoading(false);
     }
     load();
@@ -156,12 +161,20 @@ export default function HomePage() {
   }, {});
   const users = Object.keys(byUser);
 
-  const watchedTitles = feed.filter((i) => i.action === "watched").map((i) => i.movie_title);
-  const titleCounts = watchedTitles.reduce<Record<string, number>>((acc, t) => {
-    acc[t] = (acc[t] ?? 0) + 1;
-    return acc;
-  }, {});
-  const sharedTitles = new Set(Object.entries(titleCounts).filter(([, c]) => c > 1).map(([t]) => t));
+  const myWatchedTitles = new Set(
+    (currentUsername ? byUser[currentUsername] ?? [] : [])
+      .filter((i) => i.action === "watched")
+      .map((i) => i.movie_title)
+  );
+  const friendUsers = currentUsername ? users.filter((u) => u !== currentUsername) : users;
+  const friendWatchedTitles = new Set(
+    friendUsers.flatMap((u) =>
+      byUser[u].filter((i) => i.action === "watched").map((i) => i.movie_title)
+    )
+  );
+  const sharedTitles = new Set(
+    [...myWatchedTitles].filter((t) => friendWatchedTitles.has(t))
+  );
 
   return (
     <div className="max-w-4xl mx-auto px-6 py-10">
@@ -263,7 +276,7 @@ export default function HomePage() {
         <div>
           {sharedTitles.size > 0 && (
             <div className="mb-8 border border-[#222] bg-[#111] p-4">
-              <p className="text-xs text-[#888] uppercase tracking-widest mb-3">Watched by multiple friends</p>
+              <p className="text-xs text-[#888] uppercase tracking-widest mb-3">Both you and a friend watched</p>
               <div className="flex flex-wrap gap-2">
                 {Array.from(sharedTitles).map((title) => (
                   <span key={title} className="text-xs px-2 py-1 bg-white/10 border border-white/20 text-white">
@@ -273,11 +286,17 @@ export default function HomePage() {
               </div>
             </div>
           )}
+          {sharedTitles.size === 0 && myWatchedTitles.size > 0 && (
+            <div className="mb-8 border border-[#222] bg-[#111] p-4">
+              <p className="text-xs text-[#555]">No movies in common with your friends yet.</p>
+            </div>
+          )}
           <div className="flex justify-center mb-8 select-none overflow-x-auto">
             <div className="flex items-center" style={{ minWidth: users.length * 140 }}>
               {users.map((username, i) => {
                 const userItems = byUser[username];
                 const watched = userItems.filter((x) => x.action === "watched");
+                const isMe = username === currentUsername;
                 const colors = ["border-white/30 bg-white/5", "border-[#6366f1]/40 bg-[#6366f1]/5", "border-emerald-500/40 bg-emerald-500/5", "border-rose-500/40 bg-rose-500/5"];
                 return (
                   <div
@@ -286,7 +305,7 @@ export default function HomePage() {
                     style={{ width: 160, height: 160, marginLeft: i > 0 ? -40 : 0, zIndex: i }}
                   >
                     <Link href={`/profile/${username}`} className="text-xs font-medium hover:underline px-4 truncate max-w-full">
-                      {username}
+                      {isMe ? "you" : username}
                     </Link>
                     <p className="text-xl font-semibold mt-1">{watched.length}</p>
                     <p className="text-[10px] text-[#888]">watched</p>
@@ -296,26 +315,29 @@ export default function HomePage() {
             </div>
           </div>
           <div className={`grid gap-6 ${users.length > 2 ? "grid-cols-3" : "grid-cols-2"}`}>
-            {users.map((username) => (
-              <div key={username}>
-                <Link href={`/profile/${username}`} className="text-xs text-[#888] uppercase tracking-widest mb-3 block hover:text-white transition-colors">
-                  {username}
-                </Link>
-                <ul className="space-y-1.5">
-                  {byUser[username].slice(0, 8).map((item) => (
-                    <li key={item.id} className="text-sm flex items-center gap-2">
-                      <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${item.action === "watched" ? "bg-white" : "bg-[#6366f1]"}`} />
-                      <span className={`truncate ${sharedTitles.has(item.movie_title) ? "text-white font-medium" : "text-[#aaa]"}`}>
-                        {item.movie_title}
-                      </span>
-                    </li>
-                  ))}
-                  {byUser[username].length > 8 && (
-                    <li className="text-xs text-[#555]">+{byUser[username].length - 8} more</li>
-                  )}
-                </ul>
-              </div>
-            ))}
+            {users.map((username) => {
+              const isMe = username === currentUsername;
+              return (
+                <div key={username}>
+                  <Link href={`/profile/${username}`} className="text-xs text-[#888] uppercase tracking-widest mb-3 block hover:text-white transition-colors">
+                    {isMe ? "you" : username}
+                  </Link>
+                  <ul className="space-y-1.5">
+                    {byUser[username].slice(0, 8).map((item) => (
+                      <li key={item.id} className="text-sm flex items-center gap-2">
+                        <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${item.action === "watched" ? "bg-white" : "bg-[#6366f1]"}`} />
+                        <span className={`truncate ${sharedTitles.has(item.movie_title) ? "text-white font-medium" : "text-[#aaa]"}`}>
+                          {item.movie_title}
+                        </span>
+                      </li>
+                    ))}
+                    {byUser[username].length > 8 && (
+                      <li className="text-xs text-[#555]">+{byUser[username].length - 8} more</li>
+                    )}
+                  </ul>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}

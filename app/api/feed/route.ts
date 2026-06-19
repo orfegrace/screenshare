@@ -59,5 +59,7 @@ export async function GET() {
     };
   });
 
-  return NextResponse.json(feed);
+  const currentUsername = profileMap[user.id] ?? "unknown";
+
+  return NextResponse.json({ feed, current_username: currentUsername });
 }
