@@ -173,7 +173,7 @@ export default function HomePage() {
     )
   );
   const sharedTitles = new Set(
-    [...myWatchedTitles].filter((t) => friendWatchedTitles.has(t))
+    Array.from(myWatchedTitles).filter((t) => friendWatchedTitles.has(t))
   );
 
   return (
