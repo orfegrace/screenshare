@@ -94,6 +94,5 @@ Both are safe to expose in the browser — Supabase RLS handles data access cont
 
 ---
 
----
 
-*Made by Grace Chang*
+*Made by orfegrace*
